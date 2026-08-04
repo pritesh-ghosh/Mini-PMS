@@ -1,0 +1,33 @@
+portfolio-analyzer/
+│
+├── app.py                          # Main Streamlit application
+├── requirements.txt                # Python dependencies
+├── README.md                       # Project documentation
+├── SETUP_GUIDE.md                  # Step-by-step setup instructions
+│
+├── data/
+│   ├── __init__.py
+│   ├── data_fetcher.py            # Fetches stock data from Yahoo Finance
+│   └── sector_mapper.py           # Maps stocks to sectors/industries
+│
+├── analytics/
+│   ├── __init__.py
+│   ├── portfolio.py               # Core portfolio calculations
+│   ├── optimizer.py               # Portfolio optimization (Efficient Frontier)
+│   ├── advanced_risk.py           # Advanced risk metrics
+│   ├── health_score.py            # Portfolio health scoring
+│   ├── health_score_advanced.py   # Enhanced health scoring
+│   └── recommendations.py         # Recommendation engine
+│
+├── visualization/
+│   ├── __init__.py
+│   ├── charts.py                  # Chart generation functions
+│   └── dashboard.py               # Dashboard components
+│
+├── utils/
+│   ├── __init__.py
+│   └── helpers.py                 # Utility functions
+│
+└── report/
+    ├── __init__.py
+    └── report_generator.py        # PDF report generation
