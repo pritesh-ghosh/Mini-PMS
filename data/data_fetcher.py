@@ -19,7 +19,6 @@ class DataFetcher:
             ticker_found = False
             ticker_variants = [
                 ticker,  # Original
-                ticker.replace('.NS', ''),  # Without .NS
                 ticker + '.NS',  # With .NS
                 ticker.upper(),  # Uppercase
                 ticker.upper() + '.NS',  # Uppercase with .NS
@@ -85,6 +84,12 @@ class DataFetcher:
         if not benchmark_found:
             print("⚠️ WARNING: No benchmark data fetched")
         
+        # Align on calendar date: yfinance returns exchange-local, timezone-aware
+        # timestamps, which never match across markets (e.g. AAPL vs RELIANCE.NS)
+        for key, series in data.items():
+            idx = series.index.tz_localize(None) if series.index.tz is not None else series.index
+            data[key] = series.set_axis(idx.normalize())
+
         # Create DataFrame
         if data:
             df = pd.DataFrame(data).dropna()

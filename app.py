@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 from datetime import datetime
 import warnings
 import numpy as np
+
 warnings.filterwarnings('ignore')
 
 # Import custom modules
@@ -93,9 +94,10 @@ if analyze_button and valid_stocks and valid_weights:
                 st.info("Try: RELIANCE.NS, TCS.NS, INFY.NS, HDFCBANK.NS, ICICIBANK.NS")
                 st.stop()
             
-            # Filter to available stocks
-            valid_stocks = [s for s in valid_stocks if s in price_data.columns]
-            valid_weights = [valid_weights[valid_stocks.index(s)] for s in valid_stocks]
+            # Filter to available stocks, keeping each stock paired with its own weight
+            kept = [(s, w) for s, w in zip(valid_stocks, valid_weights) if s in price_data.columns]
+            valid_stocks = [s for s, _ in kept]
+            valid_weights = [w for _, w in kept]
             
             # Normalize
             total_weight = sum(valid_weights)
@@ -114,7 +116,7 @@ if analyze_button and valid_stocks and valid_weights:
             stock_returns = returns_data[valid_stocks]
             
             # 3. Analyze portfolio
-            analyzer = PortfolioAnalyzer(stock_returns, benchmark_returns, valid_weights)
+            analyzer = PortfolioAnalyzer(stock_returns, benchmark_returns, valid_weights, risk_free_rate)
             portfolio_returns = analyzer.calculate_portfolio_returns()
             metrics = analyzer.get_all_metrics(portfolio_returns)
             
@@ -137,7 +139,7 @@ if analyze_button and valid_stocks and valid_weights:
             col1, col2, col3, col4 = st.columns(4)
             
             with col1:
-                st.metric("Health Score", f"{health_score['score']}/100", health_score['rating'])
+                st.metric("Health Score", f"{health_score['score']}/100", health_score['rating'], delta_color="off")
             with col2:
                 st.metric("Total Return", f"{metrics['Total Return']*100:.1f}%")
             with col3:
@@ -294,7 +296,7 @@ if analyze_button and valid_stocks and valid_weights:
                             'Stock': stock,
                             'Current %': f"{current_w:.1f}",
                             'Optimal %': f"{opt_w:.1f}",
-                            'Change %': change,
+                            'Change %': round(change, 1),
                             'Action': '🔴 SELL' if change < -1 else '🟢 BUY' if change > 1 else '✅ HOLD'
                         })
                     
@@ -389,7 +391,7 @@ if analyze_button and valid_stocks and valid_weights:
                             'Stock': stock,
                             'Weight %': f"{optimal_weights[i] * 100:.1f}",
                             'Risk %': f"{risk_pct:.1f}",
-                            'Risk/Return Ratio': f"{(risk_pct / (optimal_weights[i] * 100)):.2f}" if optimal_weights[i] > 0 else "N/A"
+                            'Risk/Return Ratio': f"{(risk_pct / (optimal_weights[i] * 100)):.2f}" if optimal_weights[i] > 1e-4 else "N/A"
                         })
                     
                     risk_df = pd.DataFrame(risk_contributions)
@@ -426,3 +428,4 @@ else:
     Weights: 25, 20, 20, 20, 15
     Benchmark: ^NSEI
     """)
+
